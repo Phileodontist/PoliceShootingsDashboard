@@ -47,10 +47,10 @@ def main():
     cur = conn.cursor()
 
     if (table_type == 'Stage'):
-        drop_tables(cur, conn, drop_stage_table_queries)
+        # drop_tables(cur, conn, drop_stage_table_queries)
         create_tables(cur, conn, create_stage_table_queries)
     else:
-        drop_tables(cur, conn, drop_prod_table_queries)
+        # drop_tables(cur, conn, drop_prod_table_queries)
         create_tables(cur, conn, create_prod_table_queries)
         
     conn.close()

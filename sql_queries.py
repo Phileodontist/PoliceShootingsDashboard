@@ -157,7 +157,10 @@ SELECT
     name,
     date,
     manner_of_death,
-    armed,
+    CASE
+        WHEN armed is NULL THEN 'unknown'
+        ELSE armed
+    END as armed,
     age,
     CASE
         WHEN gender = 'M' THEN 'Male'
@@ -173,7 +176,7 @@ SELECT
         ELSE 'Not Documented'
     END as race,
     city,
-    state as state_name,
+    state as state_id,
     signs_of_mental_illness,
     threat_level,
     CASE
@@ -196,32 +199,46 @@ FROM stage_us_cities
 
 prod_us_demographics_transformation = ("""
 SELECT 
-    state_name, 
-    county_name as county,                              
-    CASE 
-        WHEN race like 'AMERICAN INDIAN%' then 'American Indian'
-        WHEN race like 'SOME OTHER RACE%' then 'Other'
-        WHEN race like 'WHITE%' then 'White'
-        WHEN race like 'ASIAN%' then 'Asian'
-        WHEN race like 'NATIVE HAWAIIAN%' then 'Native Hawaiian'
-        WHEN race like 'TWO OR MORE%' then 'Mixed'
-        WHEN race like 'BLACK%' then 'African American'
-    END as race,
-    sex as gender,
-    sum(CAST (population AS integer)) AS population,
-    year
-    FROM stage_us_demographics
-    WHERE
-         race is NOT NULL 
-         AND sex is NOT NULL 
-         AND min_age is NOT NULL 
-         AND max_age is NOT NULL
-         AND state_name NOT in ('Puerto Rico', 'District of Columbia')
-    GROUP BY state_name, county_name, sex, race, year
+    DISTINCT
+    suc.state_id, 
+    suc.state_name,
+    county,
+    race,
+    gender,
+    sub.population,
+    YEAR
+FROM (
+    SELECT 
+        state_name,
+        regexp_replace(county_name, 'County', '') as county,                              
+        CASE 
+            WHEN race like 'AMERICAN INDIAN%' then 'American Indian'
+            WHEN race like 'SOME OTHER RACE%' then 'Other'
+            WHEN race like 'WHITE%' then 'White'
+            WHEN race like 'ASIAN%' then 'Asian'
+            WHEN race like 'NATIVE HAWAIIAN%' then 'Native Hawaiian'
+            WHEN race like 'TWO OR MORE%' then 'Mixed'
+            WHEN race like 'BLACK%' then 'African American'
+        END as race,
+        sex as gender,
+        sum(CAST (population AS integer)) AS population,
+        year
+        FROM stage_us_demographics AS sud
+        WHERE
+             race is NOT NULL 
+             AND sex is NOT NULL 
+             AND min_age is NOT NULL 
+             AND max_age is NOT NULL
+             AND state_name NOT in ('Puerto Rico')
+        GROUP BY state_name, county_name, sex, race, YEAR
+) AS sub
+JOIN stage_us_cities AS suc
+ON sub.state_name = suc.state_name  
 """)
 
 prod_unemployment_transformation = ("""
 SELECT 
+    DISTINCT
     state_id, 
     REPLACE(area_name, ' County', '') as county_name,
     unemployment_count as unemployment_count,
@@ -233,7 +250,6 @@ FROM stage_unemployment
 ############## Prod Insert Statements ##############
 
 # QUERY LISTS
-
 create_stage_table_queries = [stage_police_shootings_table_create, stage_us_cities_table_create, stage_demographics_table_create, stage_unemployment_table_create]
 create_prod_table_queries = [prod_police_shootings_table_create, prod_us_cities_table_create, prod_demographics_table_create, prod_unemployment_table_create]
 drop_stage_table_queries = [stage_police_shootings_table_drop, stage_unemployment_table_drop]
