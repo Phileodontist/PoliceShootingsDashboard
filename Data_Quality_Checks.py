@@ -1,12 +1,14 @@
 import os
+import sys
 import unittest
 import configparser
 import psycopg2
 import psycopg2.extras
-from sql_queries import prod_tables
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(os.getcwd()), 'config.ini'))
+config.read('config.ini')
+
+from sql_queries import prod_tables
 
 def run_tests(test_class):
     suite = unittest.TestLoader().loadTestsFromTestCase(test_class)
@@ -35,6 +37,10 @@ class TestQualityCheck(unittest.TestCase):
         self.assertNotEqual(self.curr, None)
         
     def test_distinct_records(self):
+        """
+        The following test ensures consistency, 
+        making sure duplicate records doesn't exist
+        """
         for table in prod_tables:
             self.curr.execute("SELECT COUNT(*) FROM {}".format(table))
             record_count = (self.curr).fetchone()
@@ -44,3 +50,21 @@ class TestQualityCheck(unittest.TestCase):
             
             print("{}: Record Count [{}], Distinct Count [{}]".format(table, record_count, distinct_record_count))
             self.assertEqual(record_count, distinct_record_count)
+            
+    def test_date_formatting(self):
+        """
+        This following test ensures that the date value
+        is of the following format YYYY-MM-DD. 
+        Makes parsing out the year consistent.
+        """
+        
+        self.curr.execute("SELECT count(date) FROM prod_police_shootings")
+        control_count = (self.curr).fetchone()        
+        
+        self.curr.execute("SELECT count(date) FROM prod_police_shootings WHERE date ~ '^\d\d\d\d-\d\d-\d\d$'")
+        record_count = (self.curr).fetchone()
+        
+        print("Date in  this format YYYY-MM-DD: Control Count {}, Record Count {}" \
+              .format(control_count, record_count))
+        self.assertEqual(control_count, record_count)            
+    
