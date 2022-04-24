@@ -10,6 +10,10 @@ import psycopg2
 from sql_queries import create_stage_table_queries, drop_stage_table_queries, \
                         create_prod_table_queries, drop_prod_table_queries
 
+"""
+python3 create_tables.py Stage
+"""
+
 
 def drop_tables(cur, conn, queries):
     """
@@ -43,7 +47,8 @@ def main():
         print("Example: python3 create_table.py (Prod, Stage)")
         return
 
-    conn = psycopg2.connect("host={} dbname={} user={} password={} port={}".format(*config['postgres'].values()))
+    # Change config['RDS'] to config['postgres'] to connect to local
+    conn = psycopg2.connect("host={} dbname={} user={} password={} port={}".format(*config['RDS'].values()))
     cur = conn.cursor()
 
     if (table_type == 'Stage'):
