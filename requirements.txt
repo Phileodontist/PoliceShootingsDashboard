@@ -1,3 +1,6 @@
 requests
 configparser
 argparser
+pyspark
+psycopg2
+unittest
