@@ -20,3 +20,5 @@ The main focus of this project is to pull correlated data from different sources
 
 ## ETL Pipeline Workflow
 ***
+### EMR Implementation
+![Police Shootings ETL Pipeline (EMR)](https://github.com/Phileodontist/PoliceShootingsDashboard/blob/master/images/PoliceShootings-ETL-Pipeline-EMR.png)
