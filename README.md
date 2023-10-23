@@ -12,3 +12,7 @@ The main focus of this project is to pull correlated data from different sources
 * [US Demographics Dataset](https://docs.microsoft.com/en-us/azure/open-datasets/dataset-us-population-county?tabs=azureml-opendatasets)
 * [US Cities/Counties Dataset](https://simplemaps.com/data/us-cities) 
 * [US Unemployment API](https://www.careeronestop.org/Developers/WebAPI/Unemployment/get-unemployment-type.aspx)
+
+## Implementations
+### EMR Implementation
+![Police Shootings ETL Pipeline (EMR)](https://github.com/Phileodontist/PoliceShootingsDashboard/blob/master/images/PoliceShootings-ETL-Pipeline-EMR.png)
