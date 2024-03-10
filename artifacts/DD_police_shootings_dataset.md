@@ -19,3 +19,13 @@
 | latitude    | float       | 37.695             | The location of the shooting expressed as WGS84 coordinates |  |
 | location_precision    | str       | intersection              | Indicate the precision level of the location data which was geocoded to generate the record's coordinate data | `address`, `intersection`, `block`, `road` |
 | agency_ids    | str       |   1;2           | List of agency ids to enable joining with the agencies csv |  |
+
+## Police Shootings Agencies Dataset
+| Column      | Type        | Example     | Description | Possible Values |
+| ----------- | ----------- | ----------- | ----------- | ----------- |
+| id            | int         | 1             | Department database id | |
+| name          | str         | Davis County  | Department name        | `Davis County` |
+| type          | str         | state_other   | Department type        | `local_police`, `local_other`, `state_police` |
+| state         | str         | UT            | Department state       | |
+| oricodes      | str         | ABC123;XYZ987 | Department ORI codes   | |
+| total_shootings | int       | 2             | Total death records the agency has been involved with | |
