@@ -7,10 +7,9 @@ from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as func
 from sql_queries import stage_tables, prod_tables, transformation_queries
-# from sql_queries import create_prod_table_queries, drop_prod_table_queries
 
-parser = argparse.ArgumentParser(description='Collections metadata of bgpstream users')
-parser.add_argument('-m', '--mode', dest='mode', help='File containing unique IP addresses of bgpstream users', required=True)
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('-m', '--mode', dest='mode', help='options: [local, aws]', required=True)
 args = parser.parse_args()
 
 config = configparser.ConfigParser()
@@ -33,7 +32,9 @@ config.read('config.ini')
 
 """
 How to run this script via command line: 
-spark-submit --packages org.postgresql:postgresql:42.1.1 --class org.apache.hadoop:hadoop-aws:2.7.7 --class com.amazonaws:aws-java-sdk:1.7.4 ETL_Prod.py -m 'local'
+spark-submit --packages org.postgresql:postgresql:42.1.1 \
+ --class org.apache.hadoop:hadoop-aws:2.7.7 \
+ --class com.amazonaws:aws-java-sdk:1.7.4 ETL_Prod.py -m 'local'
 """
 
 """
@@ -47,7 +48,7 @@ def create_spark_session():
     """
     spark = SparkSession.builder \
                         .master('local[*]') \
-                        .appName('ETL')\
+                        .appName('Prod_Script')\
                         .getOrCreate()
     return spark
 
@@ -88,17 +89,19 @@ def write_to_prod(spark, query, table_name, db_properties):
         # Writing to local Postgres
         prod_data.write \
                  .option('driver', 'org.postgresql.Driver') \
+                 .option("truncate", "true") \
                  .jdbc(url=config.get('postgres', 'url'), 
                        table=table_name, \
-                       mode='overwrite', \
+                       mode='append', \
                        properties=db_properties)
     else:
         # Writing to RDS
         prod_data.write \
                  .option('driver', 'org.postgresql.Driver') \
+                 .option("truncate", "true") \
                  .jdbc(url=config.get('RDS', 'url'), \
                        table=table_name, \
-                       mode='overwrite', \
+                       mode='append', \
                        properties=db_properties)
     
 def main():

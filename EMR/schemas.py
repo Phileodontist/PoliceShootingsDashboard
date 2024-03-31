@@ -2,25 +2,36 @@ from pyspark.sql.types import StructType, StructField, StringType, \
                               DateType, IntegerType, BooleanType, FloatType
 
 stage_police_shootings_schema = StructType([
-    StructField('id',                StringType(), True),
-    StructField('name',              StringType(),  True),
-    StructField('date',              StringType(),    True),
-    StructField('manner_of_death',   StringType(),  True),
-    StructField('armed',             StringType(),  True),
-    StructField('age',               StringType(), True),
-    StructField('gender',            StringType(),  True),
-    StructField('race',              StringType(),  True),
-    StructField('city',              StringType(),  True),
-    StructField('state',             StringType(),  True),
-    StructField('signs_of_mental_illness', StringType(), True),
-    StructField('threat_level',      StringType(),  True),
-    StructField('flee',              StringType(),  True),
-    StructField('body_camera',       StringType(), True),
-    StructField('longitude',         StringType(),   True),
-    StructField('latitude',          StringType(),   True),
-    StructField('is_geocoding_exact', StringType(), True)
+    StructField('id',                 IntegerType(), False),
+    StructField('date',               DateType(),    True),
+    StructField('threat_level',       StringType(),  True),
+    StructField('flee',               StringType(),  True),
+    StructField('armed_with',         StringType(),  True),
+    StructField('city',               StringType(),  True),
+    StructField('county',             StringType(),  True),
+    StructField('state',              StringType(),  True),
+    StructField('longitude',          FloatType(),   True),
+    StructField('latitude',           FloatType(),   True),
+    StructField('location_precision', StringType(),  True),
+    StructField('name',               StringType(),  True),
+    StructField('age',                IntegerType(), True),
+    StructField('gender',             StringType(),  True),
+    StructField('race',               StringType(),  True),
+    StructField('race_source',        StringType(),  True),
+    StructField('mental_illness',     BooleanType(), True),
+    StructField('body_camera',        BooleanType(), True),
+    StructField('agency_ids',         StringType(),  True)
 ])
 
+stage_police_agencies_schema = StructType([
+    StructField('id',              IntegerType(), False),
+    StructField('name',            StringType(),  True),
+    StructField('type',            StringType(),  True),
+    StructField('state',           StringType(),  True),
+    StructField('oricodes',        StringType(),  True),
+    StructField('total_shootings', IntegerType(), True)
+
+])
 stage_us_cities_schema = StructType([
     StructField('city',          StringType(), True),
     StructField('city_ascii',    StringType(), True),    

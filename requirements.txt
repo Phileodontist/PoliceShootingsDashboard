@@ -1,6 +1,6 @@
 requests
 configparser
-argparser
+argparse
 pyspark
 psycopg2
 unittest

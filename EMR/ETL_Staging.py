@@ -7,11 +7,12 @@ from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as func
 from sql_queries import create_stage_table_queries, drop_stage_table_queries
-from schemas import stage_police_shootings_schema, stage_us_cities_schema, \
-                    stage_us_demographics_schema, stage_unemployment_schema, raw_unemployment_schema
+from schemas import stage_police_shootings_schema, stage_police_agencies_schema, \
+                    stage_us_cities_schema, stage_us_demographics_schema, \
+                    stage_unemployment_schema, raw_unemployment_schema
 
-parser = argparse.ArgumentParser(description='Collections metadata of bgpstream users')
-parser.add_argument('-m', '--mode', dest='mode', help='Local or AWS', required=True)
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('-m', '--mode', dest='mode', help='options: [local, aws]', required=True)
 args = parser.parse_args()
 
 config = configparser.ConfigParser()
@@ -39,7 +40,10 @@ How to run this script via command line:
 - org.apache.hadoop:hadoop-aws:2.7.7 : Version of hadoop to run Spark on
 
 # Local
-spark-submit --packages org.postgresql:postgresql:42.1.1 --class org.apache.hadoop:hadoop-aws:2.7.7 --class com.amazonaws:aws-java-sdk:1.7.4 ETL_Staging.py -m 'local'
+spark-submit --packages org.postgresql:postgresql:42.1.1 \
+ --class org.apache.hadoop:hadoop-aws:2.7.7 \
+ --class com.amazonaws:aws-java-sdk:1.7.4 \
+ ETL_Staging.py -m 'local'
 
 # Cluster
 spark-submit --packages org.postgresql:postgresql:42.1.1 ETL_Staging.py
@@ -165,12 +169,14 @@ def main():
     # Retrieve data
     unemployment_data = retrieve_unemployment_data(spark, request_unemployment_data)
     police_shootings_data = retrieve_data(spark, stage_police_shootings_schema, 'police_shootings')
+    police_agencies_data = retrieve_data(spark, stage_police_agencies_schema, 'police_agencies')
     us_demographics_data = retrieve_data(spark, stage_us_demographics_schema, 'us_demographics')
     us_cities_data = retrieve_data(spark, stage_us_cities_schema, 'us_cities')
     
     # Write date to staging tables
     write_to_stage(unemployment_data, db_properties, 'stage_unemployment')
     write_to_stage(police_shootings_data, db_properties, 'stage_police_shootings')
+    write_to_stage(police_agencies_data, db_properties, 'stage_police_agencies')
     write_to_stage(us_demographics_data, db_properties, 'stage_us_demographics')
     write_to_stage(us_cities_data, db_properties, 'stage_us_cities')
     
