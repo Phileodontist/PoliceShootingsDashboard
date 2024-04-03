@@ -1,6 +1,8 @@
 # Police Shootings Dashboard
 A dashboard that allows one to view U.S. police shootings, unemployment, and demographics data in one centralized application.
 
+[Police Shootings Dashboard [BETA]](https://lookerstudio.google.com/reporting/30465003-568b-4f7e-a042-574cfd45431f)
+
 ## Synopsis
 Interested in how racial and economic disparities correlate to crime and by extension police shootings, the conception of a police shootings dashboard to display all three side by side arose to get a better picture on the trend of police shootings throughout the United States.
 
