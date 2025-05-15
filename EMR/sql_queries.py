@@ -21,9 +21,13 @@ stateIDs = config.get("pathways", "state_ids")
 stage_police_shootings_table_drop = "DROP TABLE IF EXISTS stage_police_shootings"
 stage_police_agencies_table_drop = "DROP TABLE IF EXISTS stage_police_agencies"
 stage_unemployment_table_drop = "DROP TABLE IF EXISTS stage_unemployment"
+stage_us_cities_table_drop = "DROP TABLE IF EXISTS stage_us_cities"
+stage_us_demographics_table_drop = "DROP TABLE IF EXISTS stage_us_demographics"
 prod_police_shootings_table_drop = "DROP TABLE IF EXISTS prod_police_shootings"
 prod_police_agencies_table_drop = "DROP TABLE IF EXISTS prod_police_agencies"
 prod_unemployment_table_drop = "DROP TABLE IF EXISTS prod_unemployment"
+prod_us_cities_table_drop = "DROP TABLE IF EXISTS prod_us_cities"
+prod_us_demographics_table_drop = "DROP TABLE IF EXISTS prod_us_demographics"
 
 # CREATE TABLES
 ############## Raw data ##############
@@ -131,10 +135,7 @@ prod_police_shootings_table_create = ("""CREATE TABLE IF NOT EXISTS prod_police_
     flee                     varchar(50),
     body_camera              boolean,
     agency_ids               varchar(50),
-    PRIMARY KEY(id),
-    CONSTRAINT fk_location
-      FOREIGN KEY(state_id, county, city)
-      REFERENCES prod_us_cities(state_id, county, city)
+    PRIMARY KEY(id)
 )
 """)
 
@@ -155,7 +156,8 @@ prod_us_cities_table_create = ("""CREATE TABLE IF NOT EXISTS prod_us_cities
     state_name     varchar(50), 
     county         varchar(50),
     city           varchar(50),
-    PRIMARY KEY(state_id, county, city)
+    PRIMARY KEY(state_id, county, city),
+    UNIQUE (state_id, county, city)
 )
 """)
 
@@ -210,6 +212,7 @@ SELECT
         ELSE 'Not Documented'
     END AS race,
     city,
+    county,
     state AS state_id,
     mental_illness,
     threat_level,
@@ -255,7 +258,7 @@ SELECT
 FROM (
     SELECT 
         state_name,
-        regexp_replace(county_name, 'County', '') as county,                              
+        regexp_replace(county_name, ' County', '') as county,
         CASE 
             WHEN race like 'AMERICAN INDIAN%' then 'American Indian'
             WHEN race like 'SOME OTHER RACE%' then 'Other'
@@ -263,7 +266,7 @@ FROM (
             WHEN race like 'ASIAN%' then 'Asian'
             WHEN race like 'NATIVE HAWAIIAN%' then 'Native Hawaiian'
             WHEN race like 'TWO OR MORE%' then 'Mixed'
-            WHEN race like 'BLACK%' then 'African American'
+            WHEN race like 'BLACK%' then 'Black'
         END as race,
         sex as gender,
         sum(CAST (population AS integer)) AS population,
@@ -300,10 +303,10 @@ create_stage_table_queries = [stage_police_shootings_table_create, stage_police_
 ## Fact table should be the last one to be created
 create_prod_table_queries = [prod_police_agencies_table_create, prod_us_cities_table_create, prod_demographics_table_create, prod_unemployment_table_create, prod_police_shootings_table_create]
 
-drop_stage_table_queries = [stage_police_shootings_table_drop, stage_police_agencies_table_drop, stage_unemployment_table_drop]
+drop_stage_table_queries = [stage_police_shootings_table_drop, stage_police_agencies_table_drop, stage_unemployment_table_drop, stage_us_cities_table_drop, stage_us_demographics_table_drop]
 
 ## Fact table should be the last one to be dropped
-drop_prod_table_queries = [prod_police_agencies_table_drop, prod_unemployment_table_drop, prod_police_shootings_table_drop]
+drop_prod_table_queries = [prod_police_agencies_table_drop, prod_unemployment_table_drop, prod_police_shootings_table_drop, prod_us_cities_table_drop, prod_us_demographics_table_drop]
 
 ## Order should match the order of prod_tables
 stage_tables=['stage_police_agencies','stage_us_cities', 'stage_us_demographics', 'stage_unemployment', 'stage_police_shootings']

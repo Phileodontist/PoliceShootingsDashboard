@@ -10,6 +10,10 @@ config.read('config.ini')
 
 from sql_queries import prod_tables
 
+"""
+python3 Data_Quality_Checks.py
+"""
+
 def run_tests(test_class):
     suite = unittest.TestLoader().loadTestsFromTestCase(test_class)
     runner = unittest.TextTestRunner(verbosity=2)
@@ -61,10 +65,33 @@ class TestQualityCheck(unittest.TestCase):
         self.curr.execute("SELECT count(date) FROM prod_police_shootings")
         control_count = (self.curr).fetchone()        
         
-        self.curr.execute("SELECT count(date) FROM prod_police_shootings WHERE date ~ '^\d\d\d\d-\d\d-\d\d$'")
+        self.curr.execute("SELECT count(date) FROM prod_police_shootings WHERE CAST(date AS varchar) ~ '^\d\d\d\d-\d\d-\d\d$'")
         record_count = (self.curr).fetchone()
         
         print("Date in  this format YYYY-MM-DD: Control Count {}, Record Count {}" \
               .format(control_count, record_count))
-        self.assertEqual(control_count, record_count)            
-    
+        self.assertEqual(control_count, record_count)
+
+    def test_duplicate_records(self):
+        """
+        This following test ensures that there are no null rows
+        """
+        control_count = 0
+
+        self.curr.execute("""
+            SELECT count(*) AS count FROM
+            (
+                SELECT name, age, count(*) AS count
+                FROM prod_police_shootings
+                GROUP BY name, age
+            ) AS a
+            WHERE count > 1 AND name IS NOT null
+        """)
+        record_count = (self.curr).fetchone()
+
+        print("Number of Duplicate Entries: Record Count {}" \
+              .format(control_count, record_count))
+        self.assertEqual(control_count, record_count)
+
+if __name__ == '__main__':
+    run_tests(TestQualityCheck)
